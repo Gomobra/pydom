@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydom"
+version = "0.1.0"
+description = "pydom — a pure-Python implementation of the WHATWG DOM and HTML Standards, inspired by jsdom."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "pydom contributors" }]
+keywords = ["dom", "html", "whatwg", "jsdom", "html5", "browser", "testing", "scraping"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    # WHATWG-compliant HTML parser (pure Python). Mirrors parse5's role in jsdom.
+    "html5lib>=1.1",
+    # CSS Selectors Level 1-4 engine. Mirrors nwsapi's role in jsdom.
+    # soupsieve is built on top of bs4's element model, so we include bs4.
+    "soupsieve>=2.5",
+    "beautifulsoup4>=4.12",
+    # HTTP client for JSDOM.fromURL(). Optional dependency made required for convenience.
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/users/pydom"
+Source = "https://github.com/users/pydom"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
