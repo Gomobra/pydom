@@ -55,10 +55,20 @@ class JSDOM:
         include_node_locations: bool = False,
         storage_quota: int = 5_000_000,
         pretend_to_be_visual: bool = False,
+        run_scripts: Optional[str] = None,
         before_parse: Optional[Callable[[Window], None]] = None,
     ) -> None:
         if content_type not in self._HTML_MIME_TYPES and content_type not in self._XML_MIME_TYPES:
             raise ValueError(f"Invalid content type: {content_type!r}")
+
+        if run_scripts is not None:
+            from pydom.browser.js.runtime import RUN_SCRIPTS_VALID
+
+            if run_scripts not in RUN_SCRIPTS_VALID:
+                raise ValueError(
+                    f"run_scripts must be one of {sorted(RUN_SCRIPTS_VALID)} "
+                    f"or None; got {run_scripts!r}"
+                )
 
         self._url = resolve_url(url)
         self._referrer = referrer
@@ -66,6 +76,7 @@ class JSDOM:
         self.include_node_locations = include_node_locations
         self.storage_quota = storage_quota
         self.pretend_to_be_visual = pretend_to_be_visual
+        self.run_scripts = run_scripts
 
         self._window = Window(self)
         self._document = self._window.document
@@ -85,6 +96,11 @@ class JSDOM:
         self._document.url = self._url
         self._document.default_view = self._window
 
+        # Set up the JS runtime when requested. outside-only just installs
+        # globals + window.eval; dangerously additionally runs inline <script>.
+        if run_scripts is not None:
+            self._init_js_runtime()
+
     def _adopt_parsed_document(self, parsed: Document) -> None:
         """Move the parsed node tree into ``self._document``."""
         # Replace self._document's children with parsed document's children.
@@ -93,6 +109,17 @@ class JSDOM:
         for child in list(parsed.child_nodes):
             parsed.remove_child(child)
             self._document.append_child(child)
+
+    def _init_js_runtime(self) -> None:
+        """Create the V8 runtime and (for dangerously) run inline scripts."""
+        from pydom.browser.js.runtime import (
+            RUN_SCRIPTS_DANGEROUSLY,
+            JSRuntime,
+        )
+
+        self._js_runtime = JSRuntime(self._window)
+        if self.run_scripts == RUN_SCRIPTS_DANGEROUSLY:
+            self._js_runtime.run_inline_scripts(self._document)
 
     # ---- properties -------------------------------------------------------
     @property

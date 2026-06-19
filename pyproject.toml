@@ -38,6 +38,13 @@ dependencies = [
 dev = [
     "pytest>=8.0",
 ]
+# JavaScript execution: enables run_scripts="outside-only"/"dangerously" via
+# the Google V8 engine. Optional — core pydom imports and works without it.
+# stpyv8-icu ships the ICU data file V8 needs on Windows/macOS.
+js = [
+    "stpyv8>=12",
+    "stpyv8-icu>=12",
+]
 
 [project.urls]
 Homepage = "https://github.com/users/pydom"

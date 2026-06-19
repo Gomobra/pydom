@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterator, List, Optional
 
+from pydom.dom.event import EventTarget
 from pydom.dom.exceptions import DOMException, HierarchyRequestError, NotFoundError
 from pydom.dom.nodelist import NodeList
 
@@ -30,7 +31,7 @@ DOCUMENT_TYPE_NODE = 10
 DOCUMENT_FRAGMENT_NODE = 11
 
 
-class Node:
+class Node(EventTarget):
     """Base class for every node in the DOM tree."""
 
     nodeType: int = 0
@@ -109,6 +110,11 @@ class Node:
         "nodeName": "node_name",
         "nodeValue": "node_value",
         "nodeType": "node_type",
+        # Events (EventTarget) — jsdom parity. Node keeps its own alias dict,
+        # so it must mirror EventTarget's camelCase event names explicitly.
+        "addEventListener": "add_event_listener",
+        "removeEventListener": "remove_event_listener",
+        "dispatchEvent": "dispatch_event",
     }
 
     def __getattr__(self, name: str):

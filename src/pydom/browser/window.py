@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from pydom.browser.location import Location
 from pydom.dom.document import Document
+from pydom.dom.event import EventTarget
 from pydom.url import resolve_url
 
 if TYPE_CHECKING:  # avoid runtime import cycle
@@ -62,7 +63,7 @@ class Console:
         print(*args)
 
 
-class Window:
+class Window(EventTarget):
     """The global object associated with a :class:`~pydom.api.JSDOM` instance."""
 
     def __init__(self, jsdom: "JSDOM") -> None:
@@ -81,6 +82,8 @@ class Window:
         self.status = ""
         self._inner_width = 1024
         self._inner_height = 768
+        # Set by JSRuntime when run_scripts is enabled; None otherwise.
+        self._js_runtime = None
 
     # ---- core accessors ---------------------------------------------------
     @property
@@ -162,6 +165,24 @@ class Window:
     def close(self) -> None:
         """Shut down the window (clear timers, listeners, etc.)."""
         self._closed = True
+        if self._js_runtime is not None:
+            self._js_runtime.close()
+            self._js_runtime = None
+
+    # ---- JavaScript execution (only when run_scripts is set) -------------
+    def eval(self, source: str):
+        """Evaluate ``source`` as JavaScript in this window's V8 context.
+
+        Requires the JSDOM to have been constructed with ``run_scripts``
+        (``outside-only`` or ``dangerously``). Raises ``RuntimeError`` if no
+        JS runtime is attached.
+        """
+        if self._js_runtime is None:
+            raise RuntimeError(
+                "window.eval requires run_scripts. Construct the JSDOM with "
+                "run_scripts='outside-only' or 'dangerously'."
+            )
+        return self._js_runtime.eval(source)
 
     def _not_implemented(self, method: str) -> None:
         # Mirror jsdom's behavior: emit an error to the virtual console and

@@ -4,6 +4,7 @@ from pydom.dom.attr import Attr
 from pydom.dom.document import Document, DocumentType, HTMLElement
 from pydom.dom.document_fragment import DocumentFragment
 from pydom.dom.element import DOMTokenList, Element, NamedNodeMap
+from pydom.dom.event import CustomEvent, Event, EventTarget
 from pydom.dom.exceptions import DOMException
 from pydom.dom.node import (
     ATTRIBUTE_NODE,
@@ -38,6 +39,10 @@ __all__ = [
     "HTMLCollection",
     "NamedNodeMap",
     "DOMTokenList",
+    # Events
+    "EventTarget",
+    "Event",
+    "CustomEvent",
     # nodeType constants
     "ELEMENT_NODE",
     "ATTRIBUTE_NODE",
